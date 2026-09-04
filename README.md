@@ -126,7 +126,7 @@ It asks four things:
 
 - What you paid and how many months it covers
 - When it started
-- Which days you train
+- Which days you train, either a preset or pick your own
 - Your shortest real session
 
 Then it writes your config and downloads the other four scripts. Nothing to edit by hand. At the end it tells you what each missed session is going to cost.
