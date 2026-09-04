@@ -1,6 +1,6 @@
 // GymWidget
 // Homescreen widget showing rupees burnt on missed gym sessions.
-// Reads gym_log.txt written by GymLog.js
+// Reads gym_log.txt written by GymIn.js and GymOut.js
 
 // ---------- CONFIG ----------
 // These are only fallbacks. The Install script writes gym_config.json,
