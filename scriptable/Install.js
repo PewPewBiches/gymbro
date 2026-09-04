@@ -41,6 +41,54 @@ async function choose(title, message, options) {
   return i === -1 ? null : options[i].value
 }
 
+/// Tap rows to toggle, then Done. Any combination of days works.
+async function pickDays(names, preselected) {
+  const chosen = new Set(preselected)
+
+  const table = new UITable()
+  table.showSeparators = true
+
+  function build() {
+    table.removeAllRows()
+
+    const head = new UITableRow()
+    head.isHeader = true
+    head.addText("Tap the days you train", "Then tap Done, top right")
+    table.addRow(head)
+
+    for (let i = 0; i < 7; i++) {
+      const row = new UITableRow()
+      row.height = 52
+      const on = chosen.has(i)
+      row.addText(on ? "\u2713" : "\u00B7").widthWeight = 12
+      row.addText(names[i], on ? "training day" : "rest day").widthWeight = 88
+      row.onSelect = () => {
+        if (chosen.has(i)) chosen.delete(i)
+        else chosen.add(i)
+        build()
+        table.reload()
+      }
+      table.addRow(row)
+    }
+  }
+
+  build()
+  await table.present(false)
+
+  if (chosen.size === 0) {
+    const a = new Alert()
+    a.title = "No days picked"
+    a.message = "You need at least one training day, otherwise nothing can be missed."
+    a.addAction("Try again")
+    a.addCancelAction("Cancel")
+    const r = await a.present()
+    if (r === -1) return null
+    return pickDays(names, [1, 2, 3, 4, 5])
+  }
+
+  return [...chosen].sort()
+}
+
 async function main() {
   // 1. Money and dates
   const money = await ask(
@@ -79,17 +127,25 @@ async function main() {
   end.setMonth(end.getMonth() + months)
 
   // 3. Schedule
-  const days = await choose(
+  const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday",
+                    "Thursday", "Friday", "Saturday"]
+
+  let days = await choose(
     "Which days do you go?",
-    "Only these days can cost you money.",
+    "Only these days can cost you money. Pick a preset or choose your own.",
     [
       { label: "Monday to Friday", value: [1, 2, 3, 4, 5] },
       { label: "Mon, Wed, Fri", value: [1, 3, 5] },
-      { label: "Every day", value: [0, 1, 2, 3, 4, 5, 6] },
-      { label: "Mon to Sat", value: [1, 2, 3, 4, 5, 6] }
+      { label: "Monday to Saturday", value: [1, 2, 3, 4, 5, 6] },
+      { label: "Let me pick", value: "custom" }
     ]
   )
   if (!days) return
+
+  if (days === "custom") {
+    days = await pickDays(dayNames, [1, 2, 3, 4, 5])
+    if (!days) return
+  }
 
   // 4. Minimum session
   const mins = await choose(
