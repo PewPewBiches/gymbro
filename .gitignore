@@ -1,0 +1,11 @@
+# Your own data. Never commit these.
+gym_log.txt
+gym_config.json
+*.log
+
+# Xcode
+xcuserdata/
+*.xcuserstate
+DerivedData/
+build/
+.DS_Store
